@@ -1,0 +1,83 @@
+{
+  "info": {
+    "name": "Payments Reconciliation Service",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Ingest Single Event",
+      "request": {
+        "method": "POST",
+        "header": [
+          {"key": "Content-Type", "value": "application/json"}
+        ],
+        "url": {"raw": "http://localhost:8000/events", "protocol": "http", "host": ["localhost"], "port": "8000", "path": ["events"]},
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"event_id\": \"demo-1\",\n  \"event_type\": \"payment_initiated\",\n  \"transaction_id\": \"tx-demo-1\",\n  \"merchant_id\": \"merchant_demo\",\n  \"merchant_name\": \"Demo Merchant\",\n  \"amount\": 100.5,\n  \"currency\": \"INR\",\n  \"timestamp\": \"2026-01-08T12:11:58.085567+00:00\"\n}"
+        }
+      }
+    },
+    {
+      "name": "List Transactions",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "http://localhost:8000/transactions?merchant_id=merchant_1&status=settled&page=1&page_size=20",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "8000",
+          "path": ["transactions"],
+          "query": [
+            {"key": "merchant_id", "value": "merchant_1"},
+            {"key": "status", "value": "settled"},
+            {"key": "page", "value": "1"},
+            {"key": "page_size", "value": "20"}
+          ]
+        }
+      }
+    },
+    {
+      "name": "Transaction Details",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "http://localhost:8000/transactions/{{transaction_id}}",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "8000",
+          "path": ["transactions", "{{transaction_id}}"]
+        }
+      }
+    },
+    {
+      "name": "Reconciliation Summary",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "http://localhost:8000/reconciliation/summary?group_by=merchant,status",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "8000",
+          "path": ["reconciliation", "summary"],
+          "query": [
+            {"key": "group_by", "value": "merchant,status"}
+          ]
+        }
+      }
+    },
+    {
+      "name": "Reconciliation Discrepancies",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "http://localhost:8000/reconciliation/discrepancies",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "8000",
+          "path": ["reconciliation", "discrepancies"]
+        }
+      }
+    }
+  ]
+}
