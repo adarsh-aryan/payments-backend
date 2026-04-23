@@ -1,16 +1,17 @@
 from __future__ import annotations
 
 from datetime import datetime
+from contextlib import asynccontextmanager
 from typing import Any, Dict, List, Optional
 
 from fastapi import Depends, FastAPI, HTTPException, Query, Request
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
 
-from .db import SessionLocal, engine
-from .models import Base, EventType
+from app.db import SessionLocal, engine
+from app.models import Base, EventType
 from . import crud
-from .schemas import (
+from app.schemas import (
     EventIn,
     IngestResponse,
     PaginatedTransactions,
@@ -22,7 +23,15 @@ from .schemas import (
 
 
 def create_app() -> FastAPI:
-    app = FastAPI(title="Payments Reconciliation Service", version="0.1.0")
+    # Use lifespan instead of deprecated on_event for startup/shutdown hooks
+    @asynccontextmanager
+    async def lifespan(app: FastAPI):
+        # Startup: ensure tables exist before serving
+        Base.metadata.create_all(bind=engine)
+        yield
+        # Shutdown: nothing to clean up here
+
+    app = FastAPI(title="Payments Reconciliation Service", version="0.1.0", lifespan=lifespan)
 
     app.add_middleware(
         CORSMiddleware,
@@ -32,10 +41,7 @@ def create_app() -> FastAPI:
         allow_headers=["*"],
     )
 
-    # Create tables on startup
-    @app.on_event("startup")
-    def on_startup():  # noqa: D401
-        Base.metadata.create_all(bind=engine)
+    # Tables are created in lifespan startup above
 
     def get_db():
         db = SessionLocal()

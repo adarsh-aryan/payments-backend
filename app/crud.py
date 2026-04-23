@@ -1,9 +1,9 @@
 from __future__ import annotations
 
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Iterable, List, Optional, Tuple
 
-from sqlalchemy import and_, func, or_, select
+from sqlalchemy import and_, func, or_, select, null as sql_null
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session, joinedload
 
@@ -70,6 +70,10 @@ def insert_event_if_new(
     occurred_at: datetime,
     raw: str | None = None,
 ) -> bool:
+    # Fast path: avoid IntegrityError/rollback cascade by checking existence first
+    if session.get(Event, event_id) is not None:
+        return False
+
     ev = Event(
         id=event_id,
         transaction_id=tx_id,
@@ -82,10 +86,12 @@ def insert_event_if_new(
     )
     session.add(ev)
     try:
-        session.flush()  # Will raise on duplicate due to PK/unique
+        session.flush()
         return True
     except IntegrityError:
-        session.rollback()  # rollback the failed INSERT only
+        # In rare race conditions under concurrent writers, duplicate could slip in.
+        # Rollback the transaction to clear the failed state and report as duplicate.
+        session.rollback()
         return False
 
 
@@ -143,9 +149,12 @@ def ingest_event(session: Session, payload: dict) -> Tuple[bool, Optional[str]]:
     # Coerce types if they came in as strings
     if isinstance(event_type, str):
         event_type = EventType(event_type)
+    # Normalize timestamp to UTC-naive for consistent storage/comparisons
     if isinstance(ts, str):
         # Python 3.11+ handles RFC3339 with tz using fromisoformat
         ts = datetime.fromisoformat(ts.replace("Z", "+00:00"))
+    if isinstance(ts, datetime) and ts.tzinfo is not None:
+        ts = ts.astimezone(timezone.utc).replace(tzinfo=None)
 
     upsert_merchant(session, merchant_id, merchant_name)
     tx = ensure_transaction(session, tx_id, merchant_id, amount, currency, ts)
@@ -224,21 +233,34 @@ def summary(
     *,
     group_fields: List[str],
 ):
-    cols = []
+    select_cols = []
+    group_cols = []
     if "merchant" in group_fields:
-        cols.append(Transaction.merchant_id.label("merchant_id"))
+        c = Transaction.merchant_id.label("merchant_id")
+        select_cols.append(c)
+        group_cols.append(Transaction.merchant_id)
     else:
-        cols.append(func.null().label("merchant_id"))
-    if "date" in group_fields:
-        cols.append(func.strftime("%Y-%m-%d", Transaction.updated_at).label("date"))
-    else:
-        cols.append(func.null().label("date"))
-    if "status" in group_fields:
-        cols.append(Transaction.status.label("status"))
-    else:
-        cols.append(func.null().label("status"))
+        select_cols.append(sql_null().label("merchant_id"))
 
-    q = select(*cols, func.count().label("tx_count"), func.coalesce(func.sum(Transaction.amount), 0).label("amount_sum")).group_by(*cols)
+    if "date" in group_fields:
+        dcol = func.date(Transaction.updated_at).label("date")
+        select_cols.append(dcol)
+        group_cols.append(func.date(Transaction.updated_at))
+    else:
+        select_cols.append(sql_null().label("date"))
+
+    if "status" in group_fields:
+        scol = Transaction.status.label("status")
+        select_cols.append(scol)
+        group_cols.append(Transaction.status)
+    else:
+        select_cols.append(sql_null().label("status"))
+
+    q = select(
+        *select_cols,
+        func.count().label("tx_count"),
+        func.coalesce(func.sum(Transaction.amount), 0).label("amount_sum"),
+    ).group_by(*group_cols)
     rows = session.execute(q).all()
     return rows
 

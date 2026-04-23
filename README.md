@@ -12,7 +12,14 @@ python -m venv .venv
 pip install -r requirements.txt
 ```
 
-2. Run API locally:
+2. Configure database via .env (optional, Postgres example):
+
+```
+cp .env.example .env  # or copy manually on Windows
+# Edit .env to set DATABASE_URL or POSTGRES_* variables
+```
+
+3. Run API locally:
 
 ```
 uvicorn app.main:app --reload
@@ -20,7 +27,7 @@ uvicorn app.main:app --reload
 
 Service runs at http://127.0.0.1:8000. Interactive docs at `/docs`.
 
-3. Seed with sample events (optional, uses the ~10k events from `sample_events.json`):
+4. Seed with sample events (optional, uses the ~10k events from `sample_events.json`):
 
 ```
 python scripts/load_events.py

@@ -12,7 +12,9 @@ from app import crud
 
 
 def load_events(path: Path) -> None:
+    # Ensure tables exist for the configured database
     Base.metadata.create_all(bind=engine)
+    print(f"Using database: {engine.url}")
     data = json.loads(path.read_text(encoding="utf-8"))
     if not isinstance(data, list):
         raise ValueError("Expected a JSON array of events")
