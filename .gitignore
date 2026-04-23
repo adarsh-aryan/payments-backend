@@ -6,3 +6,5 @@ __pycache__/
 data.db
 .env
 .DS_Store
+assignment.md
+sample_events.json
