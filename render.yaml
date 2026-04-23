@@ -9,3 +9,11 @@ services:
     envVars:
       - key: POSTGRES_USER
         value: "postgres"
+      - key: POSTGRES_PASSWORD
+        value: "pNzQAesM9bcU9wH2"
+      - key: POSTGRES_HOST
+        value: "db.dmkxdctkausmcalulmax.supabase.co"
+      - key: POSTGRES_PORT
+        value: "5432"
+      - key: POSTGRES_DB
+        value: "payments"
