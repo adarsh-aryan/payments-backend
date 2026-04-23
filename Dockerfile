@@ -11,7 +11,6 @@ COPY requirements.txt ./
 RUN pip install -r requirements.txt
 
 COPY app ./app
-COPY sample_events.json ./sample_events.json
 
 ENV PORT=8080
 EXPOSE 8080
