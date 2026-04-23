@@ -10,6 +10,9 @@ WORKDIR /app
 COPY requirements.txt ./
 RUN pip install -r requirements.txt
 
+# Ensure a writable data directory exists for SQLite when used
+RUN mkdir -p /data
+
 COPY app ./app
 
 ENV PORT=8080

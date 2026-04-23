@@ -7,5 +7,5 @@ services:
     healthCheckPath: /transactions
     # For SQLite demo; set DATABASE_URL for managed DBs
     envVars:
-      - key: DATABASE_URL
-        value: "sqlite:////app/data.db"
+      - key: POSTGRES_USER
+        value: "postgres"

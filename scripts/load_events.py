@@ -28,6 +28,7 @@ def load_events(path: Path) -> None:
                 ingested += 1
             else:
                 duplicates += 1
+            print(f"Ingested: {ingested}, Duplicates: {duplicates}")
         session.commit()
     print(f"Ingested: {ingested}, Duplicates: {duplicates}, Total: {len(data)}")
 
