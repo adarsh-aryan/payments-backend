@@ -1,7 +1,9 @@
 {
   "info": {
+    "_postman_id": "fe3ff440-d211-434c-b502-989e2cef4441",
     "name": "Payments Reconciliation Service",
-    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "22371816"
   },
   "item": [
     {
@@ -9,75 +11,94 @@
       "request": {
         "method": "POST",
         "header": [
-          {"key": "Content-Type", "value": "application/json"}
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
         ],
-        "url": {"raw": "http://localhost:8000/events", "protocol": "http", "host": ["localhost"], "port": "8000", "path": ["events"]},
         "body": {
           "mode": "raw",
           "raw": "{\n  \"event_id\": \"demo-1\",\n  \"event_type\": \"payment_initiated\",\n  \"transaction_id\": \"tx-demo-1\",\n  \"merchant_id\": \"merchant_demo\",\n  \"merchant_name\": \"Demo Merchant\",\n  \"amount\": 100.5,\n  \"currency\": \"INR\",\n  \"timestamp\": \"2026-01-08T12:11:58.085567+00:00\"\n}"
+        },
+        "url": {
+          "raw": "{{BASE_URL}}/events",
+          "host": ["{{BASE_URL}}"],
+          "path": ["events"]
         }
-      }
+      },
+      "response": []
     },
     {
       "name": "List Transactions",
       "request": {
         "method": "GET",
+        "header": [],
         "url": {
-          "raw": "http://localhost:8000/transactions?merchant_id=merchant_1&status=settled&page=1&page_size=20",
-          "protocol": "http",
-          "host": ["localhost"],
-          "port": "8000",
+          "raw": "{{BASE_URL}}/transactions?merchant_id=merchant_demo&page=1&page_size=20",
+          "host": ["{{BASE_URL}}"],
           "path": ["transactions"],
           "query": [
-            {"key": "merchant_id", "value": "merchant_1"},
-            {"key": "status", "value": "settled"},
-            {"key": "page", "value": "1"},
-            {"key": "page_size", "value": "20"}
+            {
+              "key": "merchant_id",
+              "value": "merchant_demo"
+            },
+            {
+              "key": "page",
+              "value": "1"
+            },
+            {
+              "key": "page_size",
+              "value": "20"
+            }
           ]
         }
-      }
+      },
+      "response": []
     },
     {
       "name": "Transaction Details",
       "request": {
         "method": "GET",
+        "header": [],
         "url": {
-          "raw": "http://localhost:8000/transactions/{{transaction_id}}",
-          "protocol": "http",
-          "host": ["localhost"],
-          "port": "8000",
+          "raw": "{{BASE_URL}}/transactions/{{transaction_id}}",
+          "host": ["{{BASE_URL}}"],
           "path": ["transactions", "{{transaction_id}}"]
         }
-      }
+      },
+      "response": []
     },
     {
       "name": "Reconciliation Summary",
       "request": {
         "method": "GET",
+        "header": [],
         "url": {
-          "raw": "http://localhost:8000/reconciliation/summary?group_by=merchant,status",
-          "protocol": "http",
-          "host": ["localhost"],
-          "port": "8000",
+          "raw": "{{BASE_URL}}/reconciliation/summary?group_by=merchant,status",
+          "host": ["{{BASE_URL}}"],
           "path": ["reconciliation", "summary"],
           "query": [
-            {"key": "group_by", "value": "merchant,status"}
+            {
+              "key": "group_by",
+              "value": "merchant,status"
+            }
           ]
         }
-      }
+      },
+      "response": []
     },
     {
       "name": "Reconciliation Discrepancies",
       "request": {
         "method": "GET",
+        "header": [],
         "url": {
-          "raw": "http://localhost:8000/reconciliation/discrepancies",
-          "protocol": "http",
-          "host": ["localhost"],
-          "port": "8000",
+          "raw": "{{BASE_URL}}/reconciliation/discrepancies",
+          "host": ["{{BASE_URL}}"],
           "path": ["reconciliation", "discrepancies"]
         }
-      }
+      },
+      "response": []
     }
   ]
 }

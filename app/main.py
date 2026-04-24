@@ -87,6 +87,8 @@ def create_app() -> FastAPI:
             else:
                 duplicates += 1
 
+        db.commit()
+
         return IngestResponse(ingested=ingested, duplicates=duplicates, total=len(events))
 
     @app.get("/transactions", response_model=PaginatedTransactions)
